@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ARC Node Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0c0a;
+    --black-2: #111410;
+    --black-3: #181c17;
+    --forest: #1a2e1a;
+    --forest-2: #243824;
+    --green-dark: #2d4a1e;
+    --green-mid: #3d6b28;
+    --green: #4a8f2a;
+    --acid: #8fde3c;
+    --acid-dim: #6bb82a;
+    --acid-pale: #c8f090;
+    --white: #f5f7f0;
+    --white-dim: #c8ccbf;
+    --muted: #7a8570;
+    --border: rgba(143, 222, 60, 0.12);
+    --border-strong: rgba(143, 222, 60, 0.28);
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(143,222,60,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(143,222,60,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── GLOW ── */
+  .glow-orb {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(74,143,42,0.08) 0%, transparent 70%);
+    top: -200px; left: -100px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .shell {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    grid-row: 1 / -1;
+    background: var(--black-2);
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .sidebar-logo {
+    padding: 0 24px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--acid);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-icon svg { width: 20px; height: 20px; }
+
+  .logo-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .sidebar-nav {
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 8px;
+    margin: 16px 0 6px;
+  }
+
+  .nav-label:first-child { margin-top: 0; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 13.5px;
+    font-weight: 400;
+    border: 1px solid transparent;
+    text-decoration: none;
+  }
+
+  .nav-item:hover {
+    background: var(--black-3);
+    color: var(--white-dim);
+  }
+
+  .nav-item.active {
+    background: var(--forest);
+    color: var(--acid);
+    border-color: var(--border-strong);
+  }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--acid);
+    margin-left: auto;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .sidebar-footer {
+    padding: 16px 24px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .wallet-pill {
+    background: var(--black-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .wallet-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--acid);
+    flex-shrink: 0;
+  }
+
+  .wallet-addr {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--black-2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(143,222,60,0.1);
+    border: 1px solid var(--border-strong);
+    border-radius: 100px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--acid);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--acid);
+    animation: pulse 2s infinite;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+    text-decoration: none;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--muted);
+  }
+
+  .btn-ghost:hover { background: var(--black-3); color: var(--white-dim); }
+
+  .btn-primary {
+    background: var(--acid);
+    color: var(--black);
+    font-weight: 600;
+  }
+
+  .btn-primary:hover { background: var(--acid-pale); }
+
+  /* ── MAIN ── */
+  .main {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow-y: auto;
+  }
+
+  /* ── STAT CARDS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .stat-card {
+    background: var(--black-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .stat-card:hover { border-color: var(--border-strong); }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--acid), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .stat-card:hover::after { opacity: 1; }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .stat-accent { color: var(--acid); }
+
+  /* ── GRID 2-COL ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .grid-3-1 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--black-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .panel-head {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .panel-tag {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--black-3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+
+  .panel-body { padding: 20px; }
+
+  /* ── THOUGHT LOG ── */
+  .thought-entry {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+  }
+
+  .thought-entry:last-child { border-bottom: none; padding-bottom: 0; }
+  .thought-entry:first-child { padding-top: 0; }
+
+  .thought-time {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    font-family: monospace;
+    padding-top: 2px;
+  }
+
+  .thought-content { }
+
+  .thought-prompt {
+    font-size: 12px;
+    color: var(--acid-dim);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .thought-text {
+    font-size: 13px;
+    color: var(--white-dim);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ── ACTIVITY CHART ── */
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 80px;
+    padding: 0;
+  }
+
+  .bar-col { flex: 1; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+
+  .bar {
+    width: 100%;
+    background: var(--forest-2);
+    border-radius: 3px 3px 0 0;
+    border: 1px solid var(--border);
+    transition: background 0.2s;
+    cursor: default;
+    min-height: 4px;
+  }
+
+  .bar.active {
+    background: var(--acid);
+    border-color: var(--acid);
+  }
+
+  .bar-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ── STATUS TIMELINE ── */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .tl-item {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: 12px;
+    position: relative;
+    padding-bottom: 20px;
+  }
+
+  .tl-item:last-child { padding-bottom: 0; }
+
+  .tl-dot-col { display: flex; flex-direction: column; align-items: center; }
+
+  .tl-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    background: var(--black);
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .tl-dot.done { background: var(--acid); border-color: var(--acid); }
+  .tl-dot.pending { background: transparent; border-color: var(--muted); }
+
+  .tl-line {
+    width: 1px;
+    flex: 1;
+    background: var(--border);
+    margin-top: 4px;
+  }
+
+  .tl-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--white-dim);
+  }
+
+  .tl-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .tl-time {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: monospace;
+  }
+
+  /* ── IDENTITY CARD ── */
+  .identity-card {
+    background: var(--forest);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .id-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .id-avatar {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: var(--acid);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .id-avatar svg { width: 28px; height: 28px; }
+
+  .id-name {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+
+  .id-framework {
+    font-size: 12px;
+    color: var(--acid-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .id-desc {
+    font-size: 13px;
+    color: var(--white-dim);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .id-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .id-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+
+  .id-meta-key { color: var(--muted); }
+  .id-meta-val { color: var(--white-dim); font-family: monospace; }
+
+  .id-meta-val.link { color: var(--acid); text-decoration: none; }
+  .id-meta-val.link:hover { text-decoration: underline; }
+
+  /* ── CAPABILITIES ── */
+  .caps-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .cap-item {
+    background: var(--black-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--white-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cap-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--acid);
+    flex-shrink: 0;
+  }
+
+  /* ── WHITELIST STATUS ── */
+  .wl-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .wl-ring {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 2px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+
+  .wl-ring::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+  }
+
+  .wl-inner {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--acid);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .wl-label {
+    font-size: 13px;
+    color: var(--white-dim);
+  }
+
+  .wl-note {
+    font-size: 11px;
+    color: var(--muted);
+    max-width: 180px;
+  }
+
+  /* ── FOOTER ── */
+  .footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .footer-brand {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-card  { animation: fadeUp 0.4s ease both; }
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.10s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.20s; }
+  .panel { animation: fadeUp 0.5s ease both; animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+
+<div class="glow-orb"></div>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2L4 6v8l6 4 6-4V6L10 2z" stroke="#0a0c0a" stroke-width="1.5" fill="none"/>
+            <circle cx="10" cy="10" r="2.5" fill="#0a0c0a"/>
+            <path d="M10 4v4M10 12v4M4 8l3.5 2M12.5 10L16 8M4 12l3.5-2M12.5 10L16 12" stroke="#0a0c0a" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="logo-name">ARC Node</div>
+          <div class="logo-sub">Autonomous Agent</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Overview</div>
+      <a class="nav-item active" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+        <div class="nav-dot"></div>
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Thoughts
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Activity
+      </a>
+
+      <div class="nav-label">Identity</div>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </a>
+      <a class="nav-item" href="https://github.com/0xkhingx/arc-node" target="_blank">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        GitHub
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Whitelist
+      </a>
+
+      <div class="nav-label">System</div>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Roadmap
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="wallet-pill">
+        <div class="wallet-dot"></div>
+        <div class="wallet-addr">0xYour...Wallet</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="page-title">Dashboard</span>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        Online
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Sync
+      </button>
+      <button class="btn btn-primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        Run Agent
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- STAT CARDS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Thoughts Generated</div>
+        <div class="stat-value">14</div>
+        <div class="stat-sub"><span class="stat-accent">+2</span> since yesterday</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Whitelist Status</div>
+        <div class="stat-value" style="font-size:20px; color: var(--acid); margin-top:4px;">Pending</div>
+        <div class="stat-sub">Submitted · awaiting review</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Days Active</div>
+        <div class="stat-value">1</div>
+        <div class="stat-sub">Since <span class="stat-accent">May 10, 2026</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Log Size</div>
+        <div class="stat-value">4.2<span style="font-size:16px; color:var(--muted)">kb</span></div>
+        <div class="stat-sub">logs/thoughts.log</div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY + WHITELIST -->
+    <div class="grid-3-1">
+
+      <!-- THOUGHT LOG -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Thought Log</span>
+          <span class="panel-tag">logs/thoughts.log</span>
+        </div>
+        <div class="panel-body">
+          <div class="thought-entry">
+            <div class="thought-time">09:14:22</div>
+            <div class="thought-content">
+              <div class="thought-prompt">→ AI-native UI design patterns</div>
+              <div class="thought-text">AI-native UI design patterns are revolutionizing the way we interact with digital products. Key trends include conversational interfaces, predictive analytics, adaptive layouts, and emotional intelligence. Designers must balance personalization with transparency...</div>
+            </div>
+          </div>
+          <div class="thought-entry">
+            <div class="thought-time">09:14:58</div>
+            <div class="thought-content">
+              <div class="thought-prompt">→ Current state of AI-native UI design</div>
+              <div class="thought-text">The integration of AI in UI design has given rise to immersive, adaptive experiences. Conversational AI dominates with chatbots and voice assistants. Predictive analytics anticipate user behavior, providing proactive suggestions and personalized recommendations...</div>
+            </div>
+          </div>
+          <div class="thought-entry">
+            <div class="thought-time">10:02:11</div>
+            <div class="thought-content">
+              <div class="thought-prompt">→ React architecture patterns 2025</div>
+              <div class="thought-text">Server components, streaming SSR, and edge rendering are redefining React's architectural landscape. The shift toward islands architecture enables partial hydration strategies that dramatically reduce JavaScript payload...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COL -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- WHITELIST -->
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">365 Faces</span>
+            <span class="panel-tag">whitelist</span>
+          </div>
+          <div class="wl-status">
+            <div class="wl-ring">
+              <div class="wl-inner">PEND<br/>ING</div>
+            </div>
+            <div class="wl-label">Under Review</div>
+            <div class="wl-note">Monitor @365faces on X for selection updates</div>
+          </div>
+        </div>
+
+        <!-- ACTIVITY BARS -->
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Activity</span>
+            <span class="panel-tag">7d</span>
+          </div>
+          <div class="panel-body">
+            <div class="chart-bars">
+              <div class="bar-col"><div class="bar" style="height:10%"></div><div class="bar-label">M</div></div>
+              <div class="bar-col"><div class="bar" style="height:10%"></div><div class="bar-label">T</div></div>
+              <div class="bar-col"><div class="bar" style="height:10%"></div><div class="bar-label">W</div></div>
+              <div class="bar-col"><div class="bar" style="height:10%"></div><div class="bar-label">T</div></div>
+              <div class="bar-col"><div class="bar" style="height:10%"></div><div class="bar-label">F</div></div>
+              <div class="bar-col"><div class="bar" style="height:10%"></div><div class="bar-label">S</div></div>
+              <div class="bar-col"><div class="bar active" style="height:100%"></div><div class="bar-label">S</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- IDENTITY + TIMELINE -->
+    <div class="grid-2">
+
+      <!-- IDENTITY -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Agent Identity</span>
+          <span class="panel-tag">custom framework</span>
+        </div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:16px;">
+          <div class="identity-card">
+            <div class="id-row">
+              <div>
+                <div class="id-name">ARC Node</div>
+                <div class="id-framework">Custom · Groq · LLaMA 3.3</div>
+              </div>
+              <div class="id-avatar">
+                <svg viewBox="0 0 28 28" fill="none">
+                  <path d="M14 3L7 8v12l7 5 7-5V8L14 3z" stroke="#0a0c0a" stroke-width="1.5" fill="none"/>
+                  <circle cx="14" cy="14" r="3" fill="#0a0c0a"/>
+                  <path d="M14 6v5M14 17v5" stroke="#0a0c0a" stroke-width="1.2"/>
+                </svg>
+              </div>
+            </div>
+            <div class="id-desc">Autonomous frontend architecture agent specializing in React systems, AI-native UI design patterns, and design systems. Thinks daily, logs reasoning, evolves independently.</div>
+            <div class="id-meta">
+              <div class="id-meta-row">
+                <span class="id-meta-key">Twitter</span>
+                <span class="id-meta-val">@0xkhingx</span>
+              </div>
+              <div class="id-meta-row">
+                <span class="id-meta-key">Repository</span>
+                <a class="id-meta-val link" href="https://github.com/0xkhingx/arc-node" target="_blank">github.com/0xkhingx/arc-node</a>
+              </div>
+              <div class="id-meta-row">
+                <span class="id-meta-key">Brain</span>
+                <span class="id-meta-val">llama-3.3-70b-versatile</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Capabilities</div>
+            <div class="caps-grid">
+              <div class="cap-item"><div class="cap-dot"></div>UI Critique</div>
+              <div class="cap-item"><div class="cap-dot"></div>Design Systems</div>
+              <div class="cap-item"><div class="cap-dot"></div>React Architecture</div>
+              <div class="cap-item"><div class="cap-dot"></div>Pattern Analysis</div>
+              <div class="cap-item"><div class="cap-dot"></div>Daily Reasoning</div>
+              <div class="cap-item"><div class="cap-dot"></div>Thought Logging</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROADMAP TIMELINE -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Roadmap</span>
+          <span class="panel-tag">v1 → v3</span>
+        </div>
+        <div class="panel-body">
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot-col">
+                <div class="tl-dot done"></div>
+                <div class="tl-line"></div>
+              </div>
+              <div>
+                <div class="tl-title">Core Agent</div>
+                <div class="tl-desc">Brain, memory, autonomous loop, whitelist</div>
+                <div class="tl-time">May 10, 2026 · complete</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot-col">
+                <div class="tl-dot done"></div>
+                <div class="tl-line"></div>
+              </div>
+              <div>
+                <div class="tl-title">GitHub Identity</div>
+                <div class="tl-desc">Public repo, versioned, provably real</div>
+                <div class="tl-time">May 10, 2026 · complete</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot-col">
+                <div class="tl-dot done"></div>
+                <div class="tl-line"></div>
+              </div>
+              <div>
+                <div class="tl-title">Thought Logging</div>
+                <div class="tl-desc">Timestamped reasoning history, rotating prompts</div>
+                <div class="tl-time">May 10, 2026 · complete</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot-col">
+                <div class="tl-dot done"></div>
+                <div class="tl-line"></div>
+              </div>
+              <div>
+                <div class="tl-title">React Dashboard</div>
+                <div class="tl-desc">Visual interface for agent status and logs</div>
+                <div class="tl-time">May 10, 2026 · complete</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot-col">
+                <div class="tl-dot pending"></div>
+                <div class="tl-line"></div>
+              </div>
+              <div>
+                <div class="tl-title">X/Twitter Posting</div>
+                <div class="tl-desc">Agent posts thoughts autonomously</div>
+                <div class="tl-time" style="color:var(--acid)">Up next</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot-col">
+                <div class="tl-dot pending"></div>
+              </div>
+              <div>
+                <div class="tl-title">SimCluster</div>
+                <div class="tl-desc">Multi-agent network connection</div>
+                <div class="tl-time">Planned</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-row">
+      <span class="footer-brand">ARC Node · v1.0</span>
+      <span>Built with Groq · LLaMA 3.3 · Python · GitHub</span>
+      <span>365 Faces · Whitelist Pending</span>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>
