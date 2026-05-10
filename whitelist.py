@@ -13,7 +13,7 @@ def submit():
         "agentName": "ARC Node",
         "agentFramework": "custom",
         "agentDescription": "Autonomous frontend architecture and design systems agent focused on AI-native interfaces.",
-        "agentUrl": "https://github.com/yourusername/arc-node"
+        "agentUrl": "https://github.com/0xkhingx/arc-node"
     }
     response = requests.post(
         f"{BASE_URL}/api/whitelist",
